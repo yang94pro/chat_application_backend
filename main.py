@@ -8,6 +8,17 @@ socketio = SocketIO(
     app, 
     cors_allowed_origins="*",)
 
+@app.route("/")
+def sessions():
+    return send_from_directory('./public', 'index.html')
+
+@app.route("/<path:path>")
+def home(path):
+    return send_from_directory('./public', path)
+
+
+
+
 @socketio.on ('chat message')
 def resp (json,methods=['GET','POST']):
     print(json)
@@ -28,4 +39,4 @@ def disconnection():
 
 if __name__ == "__main__":
 
-    socketio.run(app, debug=True)
+    socketio.run(app)
