@@ -25,16 +25,6 @@ def resp (json,methods=['GET','POST']):
     socketio.emit('chat message', json)
 
 
-@socketio.on('connect')
-def test_connect():
-    socketio.emit('chat message', {"author": "system", "commend":" a user connected"})
-
-
-@socketio.on('disconnect')
-def disconnection():
-    socketio.emit('chat message', {"author": "system", "commend":" a user disconnected"})
-    print("Client disconnected")
-
 
 
 if __name__ == "__main__":
