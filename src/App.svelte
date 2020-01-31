@@ -4,7 +4,7 @@
 
 	let input;
 	import io from 'socket.io-client';
-	const socket = io("https://polar-eyrie-04595.herokuapp.com/");
+	const socket = io('http://localhost');
 
 	import { beforeUpdate, afterUpdate } from 'svelte';
 
