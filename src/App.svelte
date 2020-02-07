@@ -1,16 +1,19 @@
 <script>
-	let name  ;
-	let currentuser = name;
 	
-	let input;
-	import io from 'socket.io-client';
-	const socket = io('https://polar-eyrie-04595.herokuapp.com');
-
+	import { onMount } from 'svelte';
 	import { beforeUpdate, afterUpdate } from 'svelte';
 
+	let name  ;
+	let currentuser = name;
 	let div;
 	let autoscroll;
+	let input;
 
+
+	import io from 'socket.io-client';
+	const socket = io('http://127.0.0.1:5000/');
+
+	
 	beforeUpdate(() => {
 		autoscroll = div && (div.offsetHeight + div.scrollTop) > (div.scrollHeight - 20);
 	});
@@ -19,19 +22,13 @@
 		if (autoscroll) div.scrollTo(0, div.scrollHeight);
 	});
 
-	
-	let comments = [
-		{ author: 'eliza', text:"how are you", active:false}
-	];
-	socket.on('chat message', function (json) {
-        comments = comments.concat({
-				author: json.author,
-				text: json.commend,
-				time: json.time,
-				active: json.active,
-			});
-      });
-
+	function dateformat(){
+		let now = new Date();
+		const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+		const dateLocal = new Date(now.getTime() - offsetMs);
+		let str =dateLocal.toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " ");
+		return str;
+	};
 
 	function handleKeydown() {
 
@@ -43,15 +40,51 @@
 			socket.emit('chat message', {
 				"author": name, 
 				"commend": text, 
-				"time": Date(),
-				"active":false,
-				
+				"time": dateformat(),
 			});
 			
 			console.log(comments);
 			input.value = '';
 		};
 	};
+	
+	
+
+	
+	var formdata = new FormData();
+	var requestOptions = {
+		method: 'GET',
+		redirect: 'follow'
+		};
+	let comments=[];
+	onMount(async() => { 
+		const res = await fetch("http://127.0.0.1:5000/api/chat", requestOptions);
+		let results = await res.json();
+		await results.reverse().forEach(result => {
+			comments = comments.concat({
+					author: result.author,
+					text: result.commend,
+					time: result.time
+
+				});
+
+		});
+
+	});
+	
+	
+	
+	socket.on('chat message', function (json) {
+		json = JSON.parse(json);
+		console.log(typeof(json));
+        comments = comments.concat({
+				author: json.author,
+				text: json.commend,
+				time: json.time
+			});
+		
+
+      });
 
 
 </script>
@@ -70,21 +103,20 @@
 			{#if comment.author==="system"}
 				<span class="systemsg">{comment.text}</span>
 			{:else}
-				
-				<div>
-					<article class="{comment.author=== name? "user":"other"}">
-						<input type=checkbox id={comment} bind:checked={comment.active} >
-						<label for={comment}>{#if comment.author != name}{comment.author}:<n></n>{/if} {comment.text} </label>
-			
-					</article>
-					{#if comment.active}
-					<div class="receivedate">
+				<article class="{comment.author=== name? "user":"other"}">
+					<span>{#if comment.author != name}{comment.author}:<n></n>{/if} {comment.text}</span>
+					<input id="nothing" type="text">
+					<div id="commentdate">
 						{comment.time}
 					</div>
-					{/if}
-				</div>
+				</article>
 				
+				 
 			{/if}
+		{:else}
+
+			<!-- this block renders when photos.length === 0 -->
+			<center><p>Comments are loading...</p></center>
 		{/each}
 	</div>
 
@@ -122,11 +154,8 @@
      
 	  font: 20px Helvetica, Arial;
     }
-	.default{
-		opacity: 0;
-	}
 
-		
+	
 	.systemsg{
 		text-align: center;
 		display: flex;
@@ -146,7 +175,6 @@
 	
 		
 	}
-
 
 	.chat {
 		position: relative;
@@ -170,18 +198,34 @@
 		word-wrap: break-word;
 		
 	}
-	div{
-		position: relative;
-	}
 
-	input[type="checkbox"] {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		opacity: 0;
-		}
 	article {
 		margin: 0.5em 0;
+		position: relative;
+	
+		
+	}
+	#commentdate{
+		display: none;
+		transition: all 5s ease-out;
+		-webkit-transition: all 5s ease-in-out;
+
+	}
+	input#nothing{
+		opacity: 0;
+		top:0;
+		left:0;
+		position: absolute;
+		cursor: pointer;
+		transition: all 5s ease-out; 
+		-webkit-transition: all 5s ease-in-out;
+	}
+	
+	input#nothing:focus + div#commentdate{
+		display:block;
+		color: dimgrey;
+
+	
 		
 	}
 
@@ -190,14 +234,13 @@
 
 	}
 
-	label {
+	span {
 		padding: 0.5em 1em;
 		display: inline-block;
-		cursor: pointer;
 	
 	}
 
-	.other label {
+	.other span {
 		background-color: #eee;
 		border-radius: 1em 1em 1em 0;
 		max-width: 250px;
@@ -205,7 +248,7 @@
 		
 	}
 
-	.user label {
+	.user span {
 		background-color: #0074D9;
 		color: white;
 		border-radius: 1em 1em 0 1em;
@@ -213,17 +256,17 @@
 		max-width: 250px;
 		word-wrap: break-word;
 	}
-
-
-	.receivedate{
-		opacity: 1;
-		text-align: center;
-		font-size: 15px;
-		color: rgb(138, 136, 136);
-		margin:0;
-		padding:0;
+	.user input#nothing{
+		opacity: 0;
+		top:0;
+		right:0;
+		width: 100%;
+		float:right;
+		position: absolute;
+		cursor: pointer;
+		
 	}
-
+	
 
 	@media only screen and (max-width: 400px) {
 		.headdiv{

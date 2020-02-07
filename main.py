@@ -1,30 +1,34 @@
-from flask import Flask, send_from_directory, render_template, request
+from flask import Flask, request
 from flask_socketio import SocketIO
+from pymongo import MongoClient
+import json
 from flask_cors import CORS
 
-app = Flask(__name__)
+import eventlet
+from bson import json_util
 
+client = MongoClient('mongodb://localhost:27017/')
+db = client.msgdatabase
+collection = db.chat_history
+
+app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app,cors_allowed_origins="*") 
 
-@app.route("/")
-def sessions():
-    return send_from_directory('./public', 'index.html')
-
-@app.route("/<path:path>")
-def home(path):
-    return send_from_directory('./public', path)
-
-
+@app.route("/api/chat")
+def chathistory (methods=['GET']):
+    chatdb = (collection.find().sort("time",-1).limit(10))
+    chath= json_util.dumps(chatdb)
+    return chath
 
 
 @socketio.on ('chat message')
-def resp (json,methods=['GET','POST']):
-    print(json)
-    socketio.emit('chat message', json)
-
-
-
+def resp (msg,methods=['GET','POST']):
+    g=request.remote_addr
+    retrmsg=json_util.dumps(msg)
+    msg['ip']=g
+    collection.insert_one(msg)
+    socketio.emit('chat message', retrmsg)
 
 if __name__ == "__main__":
-
-    socketio.run(app)
+    socketio.run(app,debug=True)
