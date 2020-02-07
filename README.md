@@ -2,18 +2,14 @@
 
 ---
 
-# svelte app
+# Clone Messenger Web Chat with websocket
 
-This is a project template for [Svelte](https://svelte.dev) apps. It lives at https://github.com/sveltejs/template.
+This is a project template for web communication tool that using Websocket technology.
+This project consists of: Svelte framework as front-end, Python flask as Backend and Mongodb as database
 
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
 
-```bash
-npx degit sveltejs/template svelte-app
-cd svelte-app
-```
 
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
+*Note that you will need to have [Node.js](https://nodejs.org) & [Python] installed.*
 
 
 ## Get started
