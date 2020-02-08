@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_socketio import SocketIO
 from pymongo import MongoClient
 import json
-from flask_cors import CORS
+
 import eventlet
 from bson import json_util
 
@@ -12,7 +12,7 @@ db = client.msgdatabase
 collection = db.chat_history
 
 app = Flask(__name__)
-CORS(app)
+
 
 socketio = SocketIO(app,cors_allowed_origins="*") 
 
