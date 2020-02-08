@@ -3,11 +3,11 @@ from flask_socketio import SocketIO
 from pymongo import MongoClient
 import json
 from flask_cors import CORS
-
 import eventlet
 from bson import json_util
+from dblogin import mongostring
 
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient(mongostring)
 db = client.msgdatabase
 collection = db.chat_history
 
