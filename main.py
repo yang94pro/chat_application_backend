@@ -13,6 +13,7 @@ collection = db.chat_history
 
 app = Flask(__name__)
 CORS(app)
+
 socketio = SocketIO(app,cors_allowed_origins="*") 
 
 @app.route("/api/chat")
@@ -31,4 +32,4 @@ def resp (msg,methods=['GET','POST']):
     socketio.emit('chat message', retrmsg)
 
 if __name__ == "__main__":
-    socketio.run(app,debug=True)
+    socketio.run(app)
