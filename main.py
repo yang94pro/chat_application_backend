@@ -5,9 +5,9 @@ import json
 from flask_cors import CORS
 import eventlet
 from bson import json_util
-from dblogin import mongostring
 
-client = MongoClient(mongostring)
+
+client = MongoClient("mongodb+srv://ChatAdmin:123123123@chathistorydb-hwnzu.gcp.mongodb.net/test?retryWrites=true&w=majority")
 db = client.msgdatabase
 collection = db.chat_history
 
