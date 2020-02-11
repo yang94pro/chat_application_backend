@@ -28,10 +28,10 @@ def chathistory (methods=['GET']):
 
 @socketio.on ('chat message')
 def resp (msg,methods=['GET','POST']):
+    retrmsg=json_util.dumps(msg)
     socketio.emit('chat message', retrmsg)
     print(msg)
     userip= request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    retrmsg=json_util.dumps(msg)
     msg['ip']=userip
     try: collection.insert_one(msg)
     except: print("CANNNT WRITE THE DATA INTO DATABASE")
