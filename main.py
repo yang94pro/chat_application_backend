@@ -7,6 +7,7 @@ import eventlet
 from bson import json_util
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+
 try:
     client = MongoClient("mongodb+srv://ChatAdmin:123123123@chathistorydb-hwnzu.gcp.mongodb.net/test?retryWrites=true&w=majority")
     db = client.msgdatabase
@@ -22,7 +23,7 @@ socketio = SocketIO(app,cors_allowed_origins="*")
 
 @app.route("/api/chat")
 def chathistory (methods=['GET']):
-    chatdb = (collection.find().sort("time",-1).limit(100))
+    chatdb = (collection.find().sort("time",-1).limit(50))
     c= json_util.dumps(chatdb)
     return c
 
@@ -31,10 +32,8 @@ def chathistory (methods=['GET']):
 def resp (msg,methods=['GET','POST']):
     retrmsg=json_util.dumps(msg)
     socketio.emit('chat message', retrmsg)
-    x = request.headers.getlist("X-Forwarded-For")
-    print(x)
-    userip= request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
-    msg['ip']=userip
+    user_ip= request.headers.getlist("X-Forwarded-For")
+    msg['ip']=user_ip
     print(msg)
     try: collection.insert_one(msg)
     except: print("CANNNT WRITE THE DATA INTO DATABASE")
