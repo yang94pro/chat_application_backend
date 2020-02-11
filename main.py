@@ -33,7 +33,10 @@ def resp (msg,methods=['GET','POST']):
     retrmsg=json_util.dumps(msg)
     socketio.emit('chat message', retrmsg)
     user_ip= request.headers.getlist("X-Forwarded-For")
-    msg['ip']=user_ip
+    userip=""
+    for x in user_ip:
+        userip+=x
+    msg['ip']=userip
     print(msg)
     try: collection.insert_one(msg)
     except: print("CANNNT WRITE THE DATA INTO DATABASE")
