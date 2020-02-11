@@ -18,22 +18,24 @@ CORS(app)
 
 socketio = SocketIO(app,cors_allowed_origins="*") 
 
+
 @app.route("/api/chat")
 def chathistory (methods=['GET']):
-    chatdb = (collection.find().sort("time",-1).limit(10))
-    chath= json_util.dumps(chatdb)
-    return chath
+    chatdb = (collection.find().sort("time",-1).limit(100))
+    c= json_util.dumps(chatdb)
+    return c
 
 
 @socketio.on ('chat message')
 def resp (msg,methods=['GET','POST']):
+    socketio.emit('chat message', retrmsg)
     print(msg)
-    g=request.remote_addr
+    userip= request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     retrmsg=json_util.dumps(msg)
-    msg['ip']=g
+    msg['ip']=userip
     try: collection.insert_one(msg)
     except: print("CANNNT WRITE THE DATA INTO DATABASE")
-    socketio.emit('chat message', retrmsg)
+    
 
 if __name__ == "__main__":
     socketio.run(app)
