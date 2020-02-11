@@ -5,6 +5,7 @@ import json
 from flask_cors import CORS
 import eventlet
 from bson import json_util
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 try:
     client = MongoClient("mongodb+srv://ChatAdmin:123123123@chathistorydb-hwnzu.gcp.mongodb.net/test?retryWrites=true&w=majority")
@@ -15,6 +16,7 @@ except:
 
 app = Flask(__name__)
 CORS(app)
+app.wsgi_app = ProxyFix(app.wsgi_app,  x_for=1, x_host=1)
 
 socketio = SocketIO(app,cors_allowed_origins="*") 
 
@@ -30,9 +32,11 @@ def chathistory (methods=['GET']):
 def resp (msg,methods=['GET','POST']):
     retrmsg=json_util.dumps(msg)
     socketio.emit('chat message', retrmsg)
-    print(msg)
+    print(request.remote_addr)
+
     userip= request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     msg['ip']=userip
+    print(msg)
     try: collection.insert_one(msg)
     except: print("CANNNT WRITE THE DATA INTO DATABASE")
     
