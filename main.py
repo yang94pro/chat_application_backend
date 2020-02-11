@@ -31,8 +31,11 @@ def chathistory (methods=['GET']):
 def resp (msg,methods=['GET','POST']):
     retrmsg=json_util.dumps(msg)
     socketio.emit('chat message', retrmsg)
-    print(request.remote_addr)
-
+    if not request.headers.getlist("X-Forwarded-For"):
+        ip = request.remote_addr
+    else:
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    print(ip)
     userip= request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     msg['ip']=userip
     print(msg)
