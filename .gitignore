@@ -1,5 +1,5 @@
 /node_modules/
 /public/build/
 /venv/dblogin.py
-
+/.env
 .DS_Store

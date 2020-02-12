@@ -6,10 +6,12 @@ from flask_cors import CORS
 import eventlet
 from bson import json_util
 from werkzeug.middleware.proxy_fix import ProxyFix
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 try:
-    client = MongoClient("mongodb+srv://ChatAdmin:123123123@chathistorydb-hwnzu.gcp.mongodb.net/test?retryWrites=true&w=majority")
+    client = MongoClient(os.getenv("MONGODBSTRING"))
     db = client.msgdatabase
     collection = db.chat_history
 except:
