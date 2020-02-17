@@ -10,6 +10,7 @@ import pyonegraph
 from dotenv import load_dotenv
 import os
 import re
+from datetime import datetime
 load_dotenv()
 
 
@@ -18,6 +19,7 @@ try:
     client = MongoClient(os.getenv("MONGODBSTRING"))
     db = client.msgdatabase
     collection = db.chat_history
+    collection2 = db.ip_add_tracking
 except:
     print("CANNNT CONNECT DATABASE MONGODB")
 
@@ -31,6 +33,20 @@ socketio = SocketIO(app,cors_allowed_origins="*")
 def chathistory (methods=['GET']):
     chatdb = (collection.find().sort("time",-1).limit(50))
     c= json_util.dumps(chatdb)
+    try:
+        user_ip= request.headers.getlist("X-Forwarded-For")
+        user_ip_str=''
+        for x in user_ip:
+            user_ip_str = user_ip_str+","+x
+        user_data= {
+            "time": datetime.utcnow(),
+            "user_ip": user_ip_str,
+        }
+        collection2.insert_one(user_data)
+        print("An user is visiting. IP address added")
+
+    except: 
+        print("DATABASE ERROR")
     return c
 
 
@@ -42,7 +58,6 @@ def resp (msg,methods=['GET','POST']):
     if result:
         try:
             link =(pyonegraph.linkpreview(result[0]))
-
             for k, v in link.items():
                 msg[k]=v
             msg['type']="link"
@@ -50,12 +65,11 @@ def resp (msg,methods=['GET','POST']):
 
     retrmsg=json_util.dumps(msg)       
     print (retrmsg)
-    print(result)
     socketio.emit('chat message', retrmsg)
     user_ip= request.headers.getlist("X-Forwarded-For")
     userip=""
     for x in user_ip:
-        userip+=x
+        userip= userip +","+ x
     msg['ip']=userip
     print(msg)
     try: collection.insert_one(msg)
@@ -63,4 +77,4 @@ def resp (msg,methods=['GET','POST']):
     
 
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, debug=True)
