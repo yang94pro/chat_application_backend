@@ -1,11 +1,8 @@
+# Requires the PyMongo package.
+# https://api.mongodb.com/python/current
 from pymongo import MongoClient
 
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb+srv://ChatAdmin:123123123@chathistorydb-hwnzu.gcp.mongodb.net/test?authSource=admin&replicaSet=chathistorydb-shard-0&readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=true')
 
-db = client.msgdatabase
-collection = db.chat_history
-
-
-x= collection.find().sort("time",-1).limit(10)
-for y in x:
-    print (y)
+y =client['msgdatabase']['chat_history'].remove({"time":{"$gte":"2020/02/18 14:29:29" }})
+print(y)

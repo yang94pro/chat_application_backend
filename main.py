@@ -1,19 +1,15 @@
 from flask import Flask, request
 from flask_socketio import SocketIO
 from pymongo import MongoClient
-import json
 from flask_cors import CORS
-import eventlet
 from bson import json_util
 from werkzeug.middleware.proxy_fix import ProxyFix
-import pyonegraph
+from pyonegraph import linkpreview
 from dotenv import load_dotenv
 import os
 import re
 from datetime import datetime
 load_dotenv()
-
-
 
 try:
     client = MongoClient(os.getenv("MONGODBSTRING"))
@@ -52,19 +48,16 @@ def chathistory (methods=['GET']):
 
 @socketio.on ('chat message')
 def resp (msg,methods=['GET','POST']):
-    
     result = re.search('((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*', msg['commend'])
-    print(msg['commend'])
     if result:
         try:
-            link =(pyonegraph.linkpreview(result[0]))
+            link =linkpreview(result[0])
             for k, v in link.items():
                 msg[k]=v
             msg['type']="link"
         except: pass
 
     retrmsg=json_util.dumps(msg)       
-    print (retrmsg)
     socketio.emit('chat message', retrmsg)
     user_ip= request.headers.getlist("X-Forwarded-For")
     userip=""
@@ -77,4 +70,4 @@ def resp (msg,methods=['GET','POST']):
     
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app)

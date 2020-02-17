@@ -6,6 +6,7 @@ headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '\
                          'AppleWebKit/537.36 (KHTML, like Gecko) '\
                          'Chrome/75.0.3770.80 Safari/537.36'}
 s.headers.update(headers)
+
 def linkpreview(weblink):
     try: html = s.get(weblink)
     except: html = s.get("http://"+weblink)
