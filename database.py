@@ -1,11 +1,11 @@
+# Requires the PyMongo package.
+# https://api.mongodb.com/python/current
 from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
 
-client = MongoClient('mongodb://localhost:27017/')
+load_dotenv()
+client = MongoClient(os.getenv("MONGODBSTRING"))
 
-db = client.msgdatabase
-collection = db.chat_history
-
-
-x= collection.find().sort("time",-1).limit(10)
-for y in x:
-    print (y)
+y =client['msgdatabase']['chat_history'].remove({"time":{"$gte":"2020/02/18 14:29:29" }})
+print(y)
