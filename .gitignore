@@ -1,0 +1,10 @@
+/node_modules/
+/public/build/
+/venv/dblogin.py
+/.env
+.DS_Store
+.vscode
+
+/__pycache__
+/venv
+/venv/**
