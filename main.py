@@ -1,17 +1,21 @@
-from flask import Flask, request
-from flask_socketio import SocketIO
-from pymongo import MongoClient
-from flask_cors import CORS
-from bson import json_util
-from werkzeug.middleware.proxy_fix import ProxyFix
-from pyonegraph import linkpreview
-from dotenv import load_dotenv
-from datetime import datetime
-from aichatbot import chat
 import os
 import re
 from datetime import datetime
+
+from bson import json_util
+from dotenv import load_dotenv
+from flask import Flask, request
+from flask_cors import CORS
+from flask_socketio import SocketIO
+from pymongo import MongoClient
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+# from aichatbot import chat
+from pyonegraph import linkpreview
+# from chat_nlt import chatbots
+
 load_dotenv()
+bot_status= []
 
 try:
     client = MongoClient(os.getenv("MONGODBSTRING"))
@@ -61,26 +65,67 @@ def resp (msg,methods=['GET','POST']):
         except: pass
     bot_activate = re.search('^@Sherlock', msg['commend'],  re.IGNORECASE)
     print(bot_activate)
-   
+    global bot_status
+    
+    if bot_status == []:
+        bot_status.append("false")
+        print(bot_status)
+    if bot_activate:
+        bot_status[0] = "True"
+        sysmsg = {
+				"author": "system", 
+				"commend": "Sherlock bot is currently offline. ",
+				"time": datetime.strftime(datetime.now(), "%Y/%m/%d %H:%M:%S"),
+                "type": "bot"
+        }
+        collection.insert_one(sysmsg)
+        sysmsg = json_util.dumps(sysmsg)
+        socketio.emit('chat message', sysmsg)
     retrmsg=json_util.dumps(msg)       
     socketio.emit('chat message', retrmsg)
-    if bot_activate:
-        text = msg['commend']
-        text = text.lower().split('@sherlock')
-        text[1]= text[1].strip()
-        bot_responses = chat(text[1])
-        botmsg = {
-				"author": "sherlock_bot", 
-				"commend": bot_responses,
-				"time": datetime.strftime(datetime.now(), "%Y/%m/%d %H:%M:%S"),
-                "type": "bot",
-        }
-        print(botmsg)
-        try: 
-            retrmsg=json_util.dumps(botmsg)
-            socketio.emit('chat message', retrmsg)
 
-        except: print("Bot system offline")
+    # if msg['commend'] == 'quit' and bot_status[0] == "True":
+    #     bot_status[0] = "False"
+    #     sysmsg = {
+	# 			"author": "system", 
+	# 			"commend": "Sherlock bot deactivated",
+	# 			"time": datetime.strftime(datetime.now(), "%Y/%m/%d %H:%M:%S"),
+    #             "type": "bot"
+    #     }
+    #     collection.insert_one(sysmsg)
+    #     sysmsg = json_util.dumps(sysmsg)
+    #     socketio.emit('chat message', sysmsg)
+    
+    # if bot_status[0] == "True":
+        
+    #     text = msg['commend']
+    #     if '@sherlock' in text:
+    #         text = text.lower().strip('@sherlock')
+            
+    #     bot_responses = chat(text)
+    #     botmsg = {
+	# 			"author": "sherlock_bot", 
+	# 			"commend": bot_responses,
+	# 			"time": datetime.strftime(datetime.now(), "%Y/%m/%d %H:%M:%S"),
+    #             "type": "bot"
+    #     }
+        
+    #     try: 
+    #         collection.insert_one(botmsg)
+    #         retrmsg=json_util.dumps(botmsg)
+    #         socketio.emit('chat message', retrmsg)
+            
+    #     #     nltk_botcontent = chatbots()
+    #     #     nltk_botmsg = {
+	# 	# 		"author": "sherlock_bot", 
+	# 	# 		"commend": "Sherlock is currently down. You can talk to my friends",
+	# 	# 		"time": datetime.strftime(datetime.now(), "%Y/%m/%d %H:%M:%S"),
+    #     #         "type": "bot",
+    #     # }
+        
+
+
+        # except: print("Bot system offline")
     user_ip= request.headers.getlist("X-Forwarded-For")
     userip=""
     for x in user_ip:
