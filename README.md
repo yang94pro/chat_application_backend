@@ -1,6 +1,6 @@
 
 ---
-#Clone Messenger Web Chat with websocket
+# Chat application web based (backend server)
 
 
 This is a project template for web communication tool that using Websocket technology.
