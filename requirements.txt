@@ -11,7 +11,7 @@ chardet==3.0.4
 dnspython==1.16.0
 eventlet==0.25.1
 Flask==1.1.1
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 Flask-SocketIO==4.2.1
 gast==0.2.2
 get==2019.4.13
